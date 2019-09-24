@@ -37,10 +37,13 @@ RUN rm --recursive --force /var/lib/apt/lists/*
 
 # create user for development
 RUN useradd --create-home --shell /bin/bash dev
+
+# copy github repo into image, taking care of permissions
+COPY --chown=dev:dev . /home/dev/learnjs
+
+# this user for any run, cmd, or entrypoint instructions added later...
+WORKDIR /home/dev
 USER dev
-WORKDIR /home/dev/learnjs
-# copy github repo into image
-COPY --chown=dev:dev . .
 
 # ./sspa server runs on 9292 so expose that port
 EXPOSE 9292/tcp
