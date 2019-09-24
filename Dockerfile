@@ -10,9 +10,9 @@ FROM ubuntu:latest
 
 # install nodejs, python (needed only for awscli), git and utils
 RUN apt-get update && \
-    apt-get upgrade -y 
+    apt-get upgrade --yes
 
-RUN apt-get install -y --no-install-recommends \
+RUN apt-get install --yes --no-install-recommends \
     ca-certificates \
     curl \
     git \
@@ -22,22 +22,25 @@ RUN apt-get install -y --no-install-recommends \
     python3-distutils \
     unzip
 
-RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - 
-RUN apt-get install -y nodejs
+RUN curl --silent --location https://deb.nodesource.com/setup_10.x | bash - 
+RUN apt-get install --yes nodejs
 
 # install AWS cli
-RUN curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
+RUN curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" \
+    --output "awscli-bundle.zip"
 RUN unzip awscli-bundle.zip
 RUN python3 ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
-RUN rm -rf awscli-bundle
+RUN rm --recursive --force awscli-bundle
 
-RUN rm -rf /var/lib/apt/lists/*
+# cleanup apt-get stuff
+RUN rm --recursive --force /var/lib/apt/lists/*
 
-# create user for development and copy github repo into image
-RUN useradd -ms /bin/bash dev
+# create user for development
+RUN useradd --create-home --shell /bin/bash dev
 USER dev
 WORKDIR /home/dev/learnjs
+# copy github repo into image
 COPY --chown=dev:dev . .
 
-# ./sspa server runs on 9292
+# ./sspa server runs on 9292 so expose that port
 EXPOSE 9292/tcp
